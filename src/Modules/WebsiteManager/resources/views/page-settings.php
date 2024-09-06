@@ -106,9 +106,6 @@ function getPageCount(&$websiteDb, $config)
     return $row['total_pages'];
 }
 
-// Extract domain name from the configuration file
-$domainName = $config['general']['domain_name'];
-
 // Fetch the subscription plan and page count
 $subscriptionPlan = getSubscriptionPlan($domainName, $rootDb);
 $pageCount = getPageCount($websiteDb, $config);
