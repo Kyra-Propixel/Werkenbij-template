@@ -99,7 +99,7 @@ return [
                 //'forcePasteAsPlainText' => false, // when true does not copy UL, random JS errors while pasting
                 //'extraAllowedContent' => '*(*);*[*];ul ol li span', // allows classes, inline styles and certain elements
                 //'enterMode' => 'CKEDITOR.ENTER_BR', // issues on pasting in Chromes
-                'extraPlugins' => 'sourcedialog',
+                'extraPlugins' => 'sourcedialog,chatGPTPlug',  // Load custom plugin
                 'removePlugins' => 'exportpdf,magicline',
                 'toolbar' => [
                     ['Bold', 'Italic', 'Underline', 'Strike', 'Undo', 'Redo'],
@@ -107,7 +107,8 @@ return [
                     ['NumberedList', 'BulletedList'],
                     ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
                     ['FontSize', 'TextColor'],
-                    ['Sourcedialog']
+                    ['Sourcedialog'],
+                    ['chatGPTGenerateTextButton', 'chatGPTWordCountButton'],
                 ],
             ]
         ]

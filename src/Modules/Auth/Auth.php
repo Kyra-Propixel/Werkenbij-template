@@ -14,6 +14,13 @@ class Auth implements AuthContract
         $this->connectDatabase();
     }
 
+    public function __destruct()
+    {
+        if ($this->mysqli) {
+            $this->mysqli->close();
+        }
+    }
+
     /**
      * Connect to the MySQL database.
      */
@@ -49,6 +56,7 @@ class Auth implements AuthContract
         $token = isset($_GET['token']) ? trim($_GET['token']) : null;
         $userId = isset($_GET['userid']) ? (int) $_GET['userid'] : null;
         $websiteId = isset($_GET['website_id']) ? (int) $_GET['website_id'] : null;
+        $authToken = isset($_GET['auth_token']) ? trim($_GET['auth_token']) : null;
 
         if (empty($token) || empty($userId) || empty($websiteId)) {
             $this->redirectWithWarning('De SSO authenticatie was niet helemaal goede structuur');
@@ -57,6 +65,7 @@ class Auth implements AuthContract
 
         if ($this->isTokenValid($token, $userId, $websiteId)) {
             $_SESSION[$this->sessionKey] = true;
+            $_SESSION['auth_token'] = $authToken;
             $this->clearToken($token, $userId, $websiteId);
             phpb_redirect(phpb_url('website_manager'));
         } else {
@@ -70,6 +79,7 @@ class Auth implements AuthContract
     private function handleLogout()
     {
         unset($_SESSION[$this->sessionKey]);
+        unset($_SESSION['auth_token']);
         phpb_redirect(phpb_url('website_manager'));
     }
 
