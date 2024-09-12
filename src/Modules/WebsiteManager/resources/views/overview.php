@@ -183,7 +183,14 @@ $maxPages = isset($maxPagesByPlan[$subscriptionPlan]) ? $maxPagesByPlan[$subscri
                 <hr class="mb-3">
 
                 <?php if ($pageCount >= $maxPages): ?>
-                    <p class="alert alert-warning">Uw <?= ucfirst($subscriptionPlan) ?> plan biedt slechts <?= $maxPages ?> pagina's aan. Overweeg uw plan te upgraden voor meer pagina's.</p>
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>&nbsp;
+                        <div>
+                            <strong>Let op!</strong> Uw <span class="text-capitalize"><?= $subscriptionPlan ?></span> plan biedt slechts <strong><?= $maxPages ?></strong> pagina's aan. Wilt u upgraden voor meer pagina's?
+                        </div>
+                        <hr>
+                        <a href="https://propixel.nl" target="_blank" class="btn btn-success btn-sm ms-auto">Plan Upgraden</a>
+                    </div>
                 <?php else: ?>
                     <a href="<?= phpb_url('website_manager', ['route' => 'page_settings', 'action' => 'create']) ?>" class="btn btn-primary btn-sm">
                         <?= phpb_trans('website-manager.add-new-page') ?>
@@ -193,7 +200,8 @@ $maxPages = isset($maxPagesByPlan[$subscriptionPlan]) ? $maxPagesByPlan[$subscri
             </div>
 
             <div id="menus" class="tab-pane <?= phpb_e($menusTabActive) ?>">
-                <h4 class="mb-3"><?= phpb_trans('website-manager.menus') ?></h4>
+                <h4 class="mb-3">Header</h4>
+                <?php require __DIR__ . '/header-settings.php'; ?>
             </div>
 
             <div id="settings" class="tab-pane <?= phpb_e($settingsTabActive) ?>">

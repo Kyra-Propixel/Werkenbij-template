@@ -7,6 +7,7 @@ use PHPageBuilder\Contracts\WebsiteManagerContract;
 use PHPageBuilder\Extensions;
 use PHPageBuilder\Repositories\PageRepository;
 use PHPageBuilder\Repositories\SettingRepository;
+use PHPageBuilder\Repositories\HeaderSettingRepository;
 
 class WebsiteManager implements WebsiteManagerContract
 {
@@ -18,11 +19,13 @@ class WebsiteManager implements WebsiteManagerContract
      */
     public function handleRequest($route, $action)
     {
+        // Render the default overview page
         if (is_null($route)) {
             $this->renderOverview();
             exit();
         }
 
+        // Handle settings route
         if ($route === 'settings') {
             if ($action === 'renderBlockThumbs') {
                 $this->renderBlockThumbs();
@@ -34,6 +37,15 @@ class WebsiteManager implements WebsiteManagerContract
             }
         }
 
+        // Handle headerSettings route
+        if ($route === 'header_settings') {
+            if ($action === 'update') {
+                $this->handleUpdateHeaderSettings();
+                exit();
+            }
+        }
+
+        // Handle page settings route
         if ($route === 'page_settings') {
             if ($action === 'create') {
                 $this->handleCreate();
@@ -55,6 +67,7 @@ class WebsiteManager implements WebsiteManagerContract
             }
         }
     }
+
 
     /**
      * Handle requests for creating a new page.
@@ -123,6 +136,22 @@ class WebsiteManager implements WebsiteManagerContract
                 phpb_redirect(phpb_url('website_manager', ['tab' => 'settings']), [
                     'message-type' => 'success',
                     'message' => phpb_trans('website-manager.settings-updated')
+                ]);
+            }
+        }
+    }
+    /**
+     * Handle requests for updating the website settings.
+     */
+    public function handleUpdateHeaderSettings()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $headerSettingRepository = new HeaderSettingRepository;
+            $success = $headerSettingRepository->updateSettings($_POST);
+            if ($success) {
+                phpb_redirect(phpb_url('website_manager', ['tab' => 'menus']), [
+                    'message-type' => 'success',
+                    'message' => "De header bijgewerkt."
                 ]);
             }
         }

@@ -386,27 +386,195 @@ function startImageGeneration(data) {
   }, 2000);
 }
 
+// Add the custom buttons to open the modal when assets are opened in GrapesJS
 editor.on('run:open-assets', () => {
   const modalHeader = document.querySelector('.gjs-mdl-header'); // Select the modal header
 
-  // Check if the button is already added to avoid duplication by using a unique class or ID
-  if (!modalHeader.querySelector('.custom-modal-header-btn')) {
-    // Create your custom button
-    const customButton = document.createElement('button');
-    customButton.innerHTML = 'Leonardo AI'; // Button text
-    customButton.className = 'gjs-btn-prim custom-modal-header-btn'; // Add a unique class for styling
-    customButton.style.marginLeft = 'auto'; // Push the button to the right
-    customButton.style.cursor = 'pointer';
+  // Check if the Leonardo AI button is already added to avoid duplication
+  if (!modalHeader.querySelector('.custom-modal-header-btn-leonardo')) {
+    // Create the Leonardo AI button
+    const leonardoButton = document.createElement('button');
+    leonardoButton.innerHTML = 'Leonardo AI'; // Button text
+    leonardoButton.className = 'gjs-btn-prim custom-modal-header-btn-leonardo'; // Add a unique class for styling
+    leonardoButton.style.marginLeft = 'auto'; // Push the button to the right
+    leonardoButton.style.cursor = 'pointer';
 
-    // Add event listener to open the new modal when clicked
-    customButton.addEventListener('click', function () {
-      openLeonardoModal(); // Call the function to open the new modal
+    // Add event listener to open the Leonardo AI modal when clicked
+    leonardoButton.addEventListener('click', function () {
+      openLeonardoModal(); // Call the function to open the Leonardo AI modal
     });
 
-    // Append the button to the modal header
-    modalHeader.appendChild(customButton);
+    // Append the Leonardo AI button to the modal header
+    modalHeader.appendChild(leonardoButton);
+  }
+
+  // Check if the Unsplash Photos button is already added to avoid duplication
+  if (!modalHeader.querySelector('.custom-modal-header-btn-unsplash')) {
+    // Create the Unsplash Photos button
+    const unsplashButton = document.createElement('button');
+    unsplashButton.innerHTML = 'Unsplash Photos'; // Button text
+    unsplashButton.className = 'gjs-btn-prim custom-modal-header-btn-unsplash'; // Add a unique class for styling
+    unsplashButton.style.marginLeft = '10px'; // Add some space between the two buttons
+    unsplashButton.style.cursor = 'pointer';
+
+    // Add event listener to open Unsplash modal or handle Unsplash-related actions when clicked
+    unsplashButton.addEventListener('click', function () {
+      openUnsplashModal(); // Call the function to open the Unsplash modal
+    });
+
+    // Append the Unsplash Photos button to the modal header
+    modalHeader.appendChild(unsplashButton);
   }
 });
+
+// Function to open a new modal for Unsplash image search
+function openUnsplashModal() {
+  const modal = editor.Modal;
+
+  const unsplashModalContent = `
+    <!-- Unsplash Modal Structure -->
+    <div class="modal-body">
+      <!-- Left Section: Form -->
+      <div class="modal-form">
+        <h4>Unsplash Photo Search</h4>
+        <form method="post" class="unsplash-form">
+          <div>
+            <label for="query" class="unsplash-label">Search Query:</label>
+            <input type="text" id="query" name="query" required />
+          </div>
+
+          <div>
+            <label for="optionStock">Photo Type:</label>
+            <select name="optionStock" id="optionStock">
+              <option value="landscape" selected>Landscape</option>
+              <option value="portrait">Portrait</option>
+            </select>
+          </div>
+
+          <button id="start-unsplash-search-button" class="generate-btn">Search Unsplash</button>
+        </form>
+      </div>
+
+      <!-- Right section: Loading and image preview -->
+      <div class="modal-preview">
+        <div id="loading-unsplash" class="loading-message" style="display: none;">
+          <p>Loading Unsplash images...</p>
+        </div>
+        <div id="unsplash-content" style="display: none;">
+          <!-- Unsplash Images will be displayed here -->
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Set the modal content and title
+  modal.setTitle('Unsplash Image Search');
+  modal.setContent(unsplashModalContent);
+  modal.open({ preventClose: true });
+
+  // Add the search event listener after the modal is opened
+  document.getElementById('start-unsplash-search-button').addEventListener('click', function (event) {
+    event.preventDefault();
+
+    // Gather form data
+    const formData = {
+      query: document.getElementById('query').value,
+      optionStock: document.getElementById('optionStock').value,
+      websiteId: getDomainName() // Using the same function to get the website ID
+    };
+
+    // Pass the form data to the Unsplash search function
+    searchUnsplashImages(formData.query, formData.optionStock, formData.websiteId);
+  });
+}
+
+// Function to search for Unsplash images
+function searchUnsplashImages(query, optionStock, websiteId) {
+    const authToken = '<?php echo $_SESSION["auth_token"]; ?>';
+
+    const dataToSend = {
+        query: query,
+        optionStock: optionStock,
+        websiteId: websiteId
+    };
+
+    // Show loading message
+    document.getElementById('loading-unsplash').style.display = 'block';
+
+    $.ajax({
+        url: 'https://dev01.propixel.nl/post/images/unsplash',
+        method: 'POST',
+        data: JSON.stringify(dataToSend),
+        contentType: 'application/json',
+        headers: {
+            'Authorization': authToken
+        },
+        success: function (response) {
+            console.log('Unsplash API response:', response);
+
+            const content = document.getElementById('unsplash-content');
+            content.innerHTML = ''; // Clear previous content
+            document.getElementById('loading-unsplash').style.display = 'none'; // Hide loading message
+
+            if (response.images && response.images.length > 0) {
+                content.style.display = 'block'; // Show content
+
+                // Loop through the images and display them with click event to save
+                response.images.forEach(image => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = image.imgUrl;
+                    imgElement.alt = 'Unsplash Image';
+                    imgElement.style.maxWidth = '100%';
+                    imgElement.style.padding = '5px';
+                    imgElement.dataset.imageId = image.imageId; // Store the imageId in data attribute
+                    imgElement.dataset.downloadUrl = image.downloadUrl; // Store the download URL
+
+                    // Add click event to save the image
+                    imgElement.addEventListener('click', function () {
+                        saveUnsplashImage(image.imageId); // Call the save function on click
+                    });
+
+                    content.appendChild(imgElement);
+                });
+            } else {
+                content.innerHTML = 'No images found for the search query.';
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error('Error searching Unsplash images:', textStatus, errorThrown);
+            alert('Error searching Unsplash images. Please try again.');
+            document.getElementById('loading-unsplash').style.display = 'none'; // Hide loading message
+        }
+    });
+}
+
+// Function to save the Unsplash image when clicked
+function saveUnsplashImage(imageId) {
+    const authToken = '<?php echo $_SESSION["auth_token"]; ?>';
+    const websiteId = getDomainName(); // Retrieve the website ID or domain
+
+    $.ajax({
+        url: `https://dev01.propixel.nl/save/unsplash/${imageId}`, // Send request to backend
+        method: 'POST',
+        headers: {
+            'Authorization': authToken
+        },
+        contentType: 'application/json',
+        data: JSON.stringify({ websiteId: websiteId }), // Pass the websiteId with the request
+        success: function (response) {
+            if (response.converted_name) {
+                alert(`Image saved successfully as ${response.converted_name}`);
+            } else {
+                alert('Failed to save the image.');
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error('Error saving Unsplash image:', textStatus, errorThrown);
+            alert('Error saving Unsplash image. Please try again.');
+        }
+    });
+}
+
 
     // Update options based on the photoreal checkbox state
 function updateOptions() {
@@ -571,7 +739,7 @@ function saveGeneratedImages(imageUrls, websiteId) {
         method: 'POST', // This is a POST request
         data: dataToSend, // Data to send in the request body
         headers: {
-            'Authorization': authToken
+            'Authorization': authToken // Hey! Dit is jouw token! Dit mag niet gelekt worden! Dit dient als een beveiliging voor onze api om te defineren en te detecteren dat je wel toestemming hebt om de website te bewerken.
         },
         success: function (response) {
             console.log('Save Image API response:', response);
