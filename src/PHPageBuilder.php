@@ -297,6 +297,11 @@ class PHPageBuilder
             return true;
         }
 
+        if (phpb_current_relative_url() === '/api/renderMenuItems') {
+            $this->websiteManager->renderMenuItemsAPI();
+            return true;
+        }
+
         header("HTTP/1.1 404 Not Found");
         die('PHPageBuilder page not found. Check your URL: <b>' . phpb_e(phpb_full_url(phpb_current_relative_url())) . '</b>');
     }

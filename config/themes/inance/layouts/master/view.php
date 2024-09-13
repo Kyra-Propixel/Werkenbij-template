@@ -59,20 +59,9 @@
                     </button>
 
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav">
-                            <li class="nav-item active">
-                                <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="about.html">About</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="service.html">Services</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="contact.html">Contact Us</a>
-                            </li>
-                        </ul>
+                    <ul class="navbar-nav" data-target="nav-items">
+                        <!-- Static links can remain or be replaced dynamically -->
+                    </ul>
                     </div>
                 </nav>
             </div>
@@ -98,6 +87,57 @@
     document.querySelectorAll("script").forEach(function(scriptTag) {
         scriptTag.dispatchEvent(new Event('run-script'));
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/renderMenuItems')
+        .then(response => response.json())
+        .then(data => {
+            const navItemsContainer = document.querySelector('[data-target="nav-items"]');
+
+            // Clear any existing items if necessary
+            navItemsContainer.innerHTML = ''; 
+
+            // Check if the data is an array, if not, attempt to access the items
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    appendNavItem(item, navItemsContainer);
+                });
+            } else {
+                Object.values(data).forEach(item => {
+                    appendNavItem(item, navItemsContainer);
+                });
+            }
+        })
+        .catch(error => console.error('Error loading header items:', error));
+});
+
+function appendNavItem(item, navItemsContainer) {
+    try {
+        const itemData = JSON.parse(item.value);  // Parse the JSON value
+
+        if (itemData.button_text && itemData.button_link) {
+            // Create a new <li> element
+            const li = document.createElement('li');
+            li.classList.add('nav-item');
+
+            // Create an <a> element for the link
+            const link = document.createElement('a');
+            link.classList.add('nav-link');
+            link.href = itemData.button_link;
+            link.textContent = itemData.button_text;
+
+            // Append the link to the <li>
+            li.appendChild(link);
+
+            // Append the <li> to the navbar container
+            navItemsContainer.appendChild(li);
+        }
+    } catch (error) {
+        console.error('Error parsing item data:', error);
+    }
+}
 </script>
 
 

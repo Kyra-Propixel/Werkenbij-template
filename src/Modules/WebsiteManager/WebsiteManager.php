@@ -162,6 +162,27 @@ class WebsiteManager implements WebsiteManagerContract
      */
     public function renderOverview()
     {
+
+        $headerSettingRepository = new HeaderSettingRepository();
+        $headerSettings = $headerSettingRepository->getAll();
+
+        // Initialize variables
+        $headerLogo = '';
+        $headerBackground = '#ffffff';
+        $headerItems = [];
+
+        // Loop through the retrieved settings and assign values
+        foreach ($headerSettings as $setting) {
+            if ($setting['setting'] === 'header_logo') {
+                $headerLogo = $setting['value'];  // Assign logo value
+            } elseif ($setting['setting'] === 'header_background') {
+                $headerBackground = $setting['value'];  // Assign background color value
+            } elseif ($setting['setting'] === 'header_item') {
+                // Since header items are JSON-encoded, we decode them and store them in the array
+                $headerItems[] = json_decode($setting['value'], true);
+            }
+        }
+ 
         $pageRepository = new PageRepository;
         $pages = $pageRepository->getAll();
 
@@ -189,11 +210,14 @@ class WebsiteManager implements WebsiteManagerContract
     /**
      * Render the website manager menu settings (add/edit menu form).
      */
-    public function renderMenuSettings()
-    {
-        $viewFile = 'menu-settings';
-        require __DIR__ . '/resources/layouts/master.php';
-    }
+    
+     public function renderMenuSettings()
+     {
+         
+ 
+         $viewFile = 'menu-settings';
+         require __DIR__ . '/resources/layouts/master.php';
+     }
 
     /**
      * Render a thumbnail for each theme block.
@@ -204,6 +228,19 @@ class WebsiteManager implements WebsiteManagerContract
         require __DIR__ . '/resources/layouts/master.php';
     }
 
+    public function renderMenuItemsAPI(){
+        $headerSettingRepository = new HeaderSettingRepository();
+        $headerSettings = $headerSettingRepository->getAll();
+
+        // Filter out only header_item settings
+        $headerItems = array_filter($headerSettings, function ($setting) {
+            return $setting['setting'] === 'header_item';
+        });
+
+        header('Content-Type: application/json');
+        echo json_encode($headerItems);
+        exit();
+    }
     /**
      * Render the website manager welcome page for installations without a homepage.
      */

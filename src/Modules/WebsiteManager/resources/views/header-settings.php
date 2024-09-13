@@ -1,17 +1,12 @@
-<!-- Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Font Awesome for icons removed -->
 
 <div class="container mt-5">
-    <h1 class="mb-4"><?= phpb_trans('website-manager.global-header-settings'); ?></h1>
-    <?php
-        if (phpb_flash('message')):
-        ?>
+    <?php if (phpb_flash('message')): ?>
         <div class="alert alert-<?= phpb_flash('message-type') ?>">
             <?= phpb_flash('message') ?>
         </div>
-        <?php
-        endif;
-        ?>
+    <?php endif; ?>
+    
     <form action="<?= phpb_url('website_manager', ['route' => 'header_settings', 'action' => 'update', 'tab' => 'menus']) ?>" method="post" enctype="multipart/form-data" id="headerSettingsForm">
         
         <!-- Global Header Settings (Logo and Background) -->
@@ -22,13 +17,18 @@
                 <label for="header_logo">Logo Navbar</label>
                 <div class="custom-file">
                     <input type="file" class="custom-file-input" id="header_logo" name="header_logo">
-                    <label class="custom-file-label" for="header_logo"><?= phpb_trans('website-manager.choose-file'); ?></label>
+                    <label class="custom-file-label" for="header_logo">
+                        <?= !empty($headerLogo) ? basename($headerLogo) : phpb_trans('website-manager.choose-file'); ?>
+                    </label>
                 </div>
+                <?php if (!empty($headerLogo)): ?>
+                    <img src="<?= htmlspecialchars($headerLogo) ?>" alt="Current Logo" style="max-height: 100px; margin-top: 10px;">
+                <?php endif; ?>
             </div>
 
             <div class="mb-3">
                 <label for="header_background">Color Navbar</label>
-                <input type="color" class="form-control form-control-color" id="header_background" name="header_background" value="#ffffff">
+                <input type="color" class="form-control form-control-color" id="header_background" name="header_background" value="<?= htmlspecialchars($headerBackground ?? '#ffffff') ?>">
             </div>
         </div>
 
@@ -37,178 +37,416 @@
             <h4 class="mb-3">Menu Items</h4>
 
             <div id="headerItemsContainer" class="grid-container">
-                <!-- Dynamically added items like buttons will appear here -->
+                <?php if (!empty($headerItems)): ?>
+                    <?php foreach ($headerItems as $index => $item): ?>
+                        <div class="header-item form-group mb-3" id="header-item-<?= $index ?>">
+                            <h5 class="mb-2">Item <?= $index + 1 ?></h5>
+
+                            <div class="mb-3">
+                                <label for="header_button_text_<?= $index ?>">Header Button Text</label>
+                                <input type="text" class="form-control truncate" id="header_button_text_<?= $index ?>" name="header_items[<?= $index ?>][button_text]" value="<?= htmlspecialchars($item['button_text']) ?>" placeholder="Item Button Name">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="header_button_link_<?= $index ?>">Header Button URL</label>
+                                <input type="text" class="form-control" id="header_button_link_<?= $index ?>" name="header_items[<?= $index ?>][button_link]" value="<?= htmlspecialchars($item['button_link']) ?>" placeholder="Item Button URL">
+                            </div>
+
+                            <button type="button" class="btn btn-danger btn-sm remove-header-item">
+                            <i class="fas fa-trash-alt"></i> Remove Item
+                            </button>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
 
             <!-- Button to add new items, which will be replaced with a warning after 6 items -->
             <div id="addHeaderItemContainer">
                 <button type="button" class="btn btn-secondary btn-sm mb-3" id="addHeaderItemButton">
-                    <?= phpb_trans('website-manager.add-header-item'); ?> +
+                    Add Item +
                 </button>
             </div>
         </div>
 
         <button class="btn btn-primary btn-sm" type="submit">
-            <?= phpb_trans('website-manager.save-settings'); ?>
+            <?= phpb_trans('website-manager.save-settings') ?>
         </button>
     </form>
 </div>
 
 <!-- Custom CSS for styling and grid layout -->
 <style>
-    /* Container for grid layout, 3 columns max */
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* 3 items max, flexible */
-        gap: 20px;
-    }
 
-    .custom-file-input {
-        cursor: pointer;
-    }
+    /* Smooth transition when items are moved */
+.header-item {
+    transition: transform 0.2s ease, opacity 0.2s ease-in-out;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for a modern look */
+    overflow: hidden;
+    position: relative;
+}
 
-    .custom-file-label {
-        cursor: pointer;
-    }
+/* Add a modern hover effect */
+.header-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Larger, softer shadow on hover */
+}
 
-    .form-control-color {
-        width: 100%;
-        height: 38px;
-    }
+/* Style for the item being dragged */
+.sortable-chosen {
+    opacity: 0.8; /* Slightly less transparent for better visibility */
+    transform: scale(1.05);
+    background-color: #f5f5f5; /* Lighter background to indicate drag state */
+    border-radius: 12px;
+}
 
-    .header-settings, .header-items-container {
-        background-color: #f8f9fa;
-    }
+/* Ghost element to visualize where the item will be placed */
+.sortable-ghost {
+    opacity: 0.3;
+    background-color: #e9ecef; /* Subtle background color for ghost element */
+    border: 2px dashed #cccccc;
+    border-radius: 12px;
+}
 
-    .header-item {
-        background-color: #e9ecef;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease;
-    }
+/* Adding a placeholder style to show where the item will be dropped */
+.sortable-placeholder {
+    height: 60px;
+    background-color: #f1f3f4; /* Light background color for the placeholder */
+    border: 2px solid #dcdcdc;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Inset shadow for depth */
+}
 
-    .header-item:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
+/* Improve the layout and spacing for the header items */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Adjust to better fit modern screen sizes */
+    gap: 24px;
+}
 
-    .btn-sm {
-        padding: .25rem .5rem;
-    }
+/* Style the custom file input for a modern look */
+.custom-file-input {
+    cursor: pointer;
+    border-radius: 6px;
+}
 
-    .truncate {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: block;
-        max-width: 100%;
-    }
+.custom-file-label {
+    cursor: pointer;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #f1f3f4;
+    border: 1px solid #ced4da;
+}
 
-    .remove-header-item {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-    }
+/* Style the color input */
+.form-control-color {
+    width: 100%;
+    height: 48px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+}
 
-    .remove-header-item i {
-        margin-right: 4px;
-    }
+/* Adjust form control elements for a modern design */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 10px 15px;
+    font-size: 14px;
+}
+
+/* Truncate long text in header button inputs */
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+/* Modernize the button styles */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* Style for the original index badge */
+.original-index {
+    font-size: 12px;
+    color: #ffffff;
+    background-color: #007bff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Adjust margins and paddings in the header settings section */
+.header-settings {
+    padding: 20px;
+    background-color: #f1f3f4;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow for the header settings */
+}
+
+.header-items-container {
+    padding: 20px;
+    background-color: #f1f3f4;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow for the menu items */
+}
+
+/* Style for the original index badge */
+.original-index {
+    font-size: 12px;
+    color: #ffffff;
+    background-color: #007bff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-left: 10px;
+    display: inline-block;
+    font-weight: 500;
+}
+
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
 <script>
-    let itemCount = 0;  // Keep track of item count for unique identifiers
-    const maxItems = 6; // Maximum allowed items
+let itemCount = <?= isset($headerItems) ? count($headerItems) : 0 ?>;
+const maxItems = 6;
+let originalOrder = []; // Track the original positions
 
-    // Function to add a new header item (such as a button)
-    document.getElementById('addHeaderItemButton').addEventListener('click', function() {
-        if (itemCount < maxItems) {
-            addItem();
-        }
-        if (itemCount >= maxItems) {
-            displayMaxItemsWarning();
+document.addEventListener('DOMContentLoaded', function () {
+    const headerItemsContainer = document.getElementById('headerItemsContainer');
+
+    // Store the original order of the items when the page first loads
+    document.querySelectorAll('.header-item').forEach((item, index) => {
+        item.setAttribute('data-original-index', index + 1);  // Store original position
+        originalOrder.push(index + 1); // Store the original order in the array
+    });
+
+    // Initialize the headings based on input values on page load
+    updateItemNumbers();
+
+    // Initialize SortableJS with enhanced options
+    Sortable.create(headerItemsContainer, {
+        animation: 300,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        handle: '.header-item',
+        swapThreshold: 0.5,
+        filter: 'input, textarea',  // Prevent dragging while interacting with inputs
+        preventOnFilter: false,
+        onEnd: function () {
+            showOriginalPositions();  // Show original badges after moving an item
+            updateItemNumbers();  // Renumber the items after sorting
         }
     });
 
-    // Function to add a new item
-    function addItem() {
-        const newItem = document.createElement('div');
-        newItem.classList.add('header-item', 'form-group', 'mb-3');
-        newItem.id = `header-item-${itemCount}`;
+    // Event listener for "Header Button Text" input fields only
+    document.addEventListener('input', function (event) {
+        if (event.target.matches('.header-item input[name^="header_items"][name$="[button_text]"]')) {
+            const input = event.target;
+            const headerItem = input.closest('.header-item');
+            const itemIndex = Array.from(headerItemsContainer.children).indexOf(headerItem);
+            const heading = headerItem.querySelector('h5');
+            const originalIndex = headerItem.getAttribute('data-original-index');
+            const badge = headerItem.querySelector('.original-index');
 
-        newItem.innerHTML = `
-            <h5 class="mb-2">Header Button ${itemCount + 1}</h5>
-            
-            <div class="mb-3">
-                <label for="header_button_text_${itemCount}">Header Button Text</label>
-                <input type="text" class="form-control truncate" id="header_button_text_${itemCount}" name="header_items[${itemCount}][button_text]" placeholder="Item Button Name">
-            </div>
+            // Update heading text based on input value
+            if (input.value.trim() !== '') {
+                heading.textContent = input.value.trim();  // Set the heading to input value
+            } else {
+                heading.textContent = `Item ${itemIndex + 1}`;  // Default to "Item <number>"
+            }
 
-            <div class="mb-3">
-                <label for="header_button_link_${itemCount}">Header Button URL</label>
-                <input type="url" class="form-control" id="header_button_link_${itemCount}" name="header_items[${itemCount}][button_link]" placeholder="Item Button URL">
-            </div>
+            // Ensure the badge is updated with the original index
+            if (badge) {
+                badge.textContent = `Original Position: ${originalIndex}`;
+                badge.style.display = 'inline-block'; // Show the badge
+            }
+        }
+    });
+});
 
-            <button type="button" class="btn btn-danger btn-sm remove-header-item">
-                <i class="fas fa-trash-alt"></i> <?= phpb_trans('website-manager.remove-item'); ?>
+// Function to show original positions in badges after sorting or interaction
+function showOriginalPositions() {
+    document.querySelectorAll('.header-item').forEach((item) => {
+        const originalIndex = item.getAttribute('data-original-index');
+        let originalIndexBadge = item.querySelector('.original-index');
+
+        // Check if the badge doesn't already exist
+        if (!originalIndexBadge) {
+            // Create the badge if it doesn't exist
+            originalIndexBadge = document.createElement('span');
+            originalIndexBadge.classList.add('badge', 'badge-primary', 'original-index');
+            originalIndexBadge.style.marginLeft = '10px'; // Add margin for spacing
+            item.querySelector('h5').appendChild(originalIndexBadge);  // Append the badge to the header
+        }
+
+        // Update the badge content with the original index
+        originalIndexBadge.textContent = `Original Position: ${originalIndex}`;
+        originalIndexBadge.style.display = 'inline-block'; // Ensure the badge is visible
+    });
+}
+
+// Function to remove badges when the page is reloaded (i.e., reset)
+function removeOriginalBadges() {
+    document.querySelectorAll('.original-index').forEach(badge => {
+        badge.style.display = 'none';  // Hide badges when the page reloads
+    });
+}
+
+// Call removeOriginalBadges on page load to hide badges on reload
+removeOriginalBadges();
+
+// Function to add a new header item
+document.getElementById('addHeaderItemButton').addEventListener('click', function () {
+    if (itemCount < maxItems) {
+        addItem();
+    }
+    if (itemCount >= maxItems) {
+        displayMaxItemsWarning();
+    }
+});
+
+// Event delegation for remove button
+document.addEventListener('click', function (event) {
+    if (event.target.closest('.remove-header-item')) {
+        event.target.closest('.header-item').remove();
+        updateItemNumbers();  // Update the item numbers after deletion
+        hideMaxItemsWarning(); // Hide the warning if we're back under the limit
+    }
+});
+
+// Function to add a new header item
+function addItem(buttonText = '', buttonLink = '') {
+    const newItem = document.createElement('div');
+    newItem.classList.add('header-item', 'form-group', 'mb-3');
+    newItem.id = `header-item-${itemCount}`;
+
+    const itemNumber = itemCount + 1;
+    newItem.innerHTML = `
+        <h5 class="mb-2">${buttonText ? buttonText : 'Item ' + itemNumber}</h5>
+        <div class="mb-3">
+            <label for="header_button_text_${itemCount}">Header Button Text</label>
+            <input type="text" class="form-control truncate" id="header_button_text_${itemCount}" name="header_items[${itemCount}][button_text]" value="${buttonText}" placeholder="Item Button Name">
+        </div>
+        <div class="mb-3">
+            <label for="header_button_link_${itemCount}">Header Button URL</label>
+            <input type="text" class="form-control" id="header_button_link_${itemCount}" name="header_items[${itemCount}][button_link]" value="${buttonLink}" placeholder="Item Button URL">
+        </div>
+        <button type="button" class="btn btn-danger btn-sm remove-header-item">
+            <i class="fas fa-trash-alt"></i> Remove Item
+        </button>
+    `;
+
+    document.getElementById('headerItemsContainer').appendChild(newItem);
+    itemCount++;
+
+    // Renumber items after adding
+    updateItemNumbers();
+}
+
+// Function to update item numbers and set headings on page reload
+function updateItemNumbers() {
+    const headerItems = document.querySelectorAll('.header-item');
+    itemCount = headerItems.length;  // Adjust the itemCount to match current items
+
+    // Loop through each item and set the heading based on input value or default to "Item <number>"
+    headerItems.forEach((item, index) => {
+        const heading = item.querySelector('h5');
+        const input = item.querySelector('input[name^="header_items"][name$="[button_text]"]');
+        const originalIndex = item.getAttribute('data-original-index');
+        const badge = item.querySelector('.original-index');
+
+        // Set heading to the input value or default to "Item <number>"
+        if (input.value.trim() !== '') {
+            heading.textContent = input.value.trim();
+        } else {
+            heading.textContent = `Item ${index + 1}`;
+        }
+
+        // Update the badge with the original index
+        if (badge) {
+            badge.textContent = `Original Position: ${originalIndex}`;
+        }
+
+        // Update IDs and other elements to reflect the correct order
+        item.id = `header-item-${index}`;
+        input.id = `header_button_text_${index}`;
+        item.querySelector('input[type="text"]').id = `header_button_link_${index}`;
+    });
+}
+
+// Function to display the warning message when max items limit is reached
+function displayMaxItemsWarning() {
+    const warningMessage = `
+        <div class="alert alert-warning" role="alert">
+            Je kan tot maximaal 6 items per header.
+        </div>
+    `;
+    document.getElementById('addHeaderItemContainer').innerHTML = warningMessage;
+}
+
+// Function to hide the warning message when items are removed and limit is not reached
+function hideMaxItemsWarning() {
+    if (itemCount < maxItems) {
+        const addButton = `
+            <button type="button" class="btn btn-secondary btn-sm mb-3" id="addHeaderItemButton">
+                Add Item +
             </button>
         `;
-
-        // Append the new item (button) to the container
-        document.getElementById('headerItemsContainer').appendChild(newItem);
-
-        // Attach event listener for the remove button
-        newItem.querySelector('.remove-header-item').addEventListener('click', function() {
-            newItem.remove();
-            updateItemNumbers();  // Update the item numbers after deletion
-            hideMaxItemsWarning(); // Hide the warning if we're back under the limit
-        });
-
-        itemCount++;  // Increment item count
-    }
-
-    // Function to display the warning message when the max items limit is reached
-    function displayMaxItemsWarning() {
-        const warningMessage = `
-            <div class="alert alert-warning" role="alert">
-                Je kan tot maximaal 6 items per header.
-            </div>
-        `;
-        document.getElementById('addHeaderItemContainer').innerHTML = warningMessage;
-    }
-
-    // Function to hide the warning message when items are removed and limit is not reached
-    function hideMaxItemsWarning() {
-        if (itemCount < maxItems) {
-            const addButton = `
-                <button type="button" class="btn btn-secondary btn-sm mb-3" id="addHeaderItemButton">
-                    <?= phpb_trans('website-manager.add-header-item'); ?> +
-                </button>
-            `;
-            document.getElementById('addHeaderItemContainer').innerHTML = addButton;
-            document.getElementById('addHeaderItemButton').addEventListener('click', function() {
-                if (itemCount < maxItems) {
-                    addItem();
-                }
-                if (itemCount >= maxItems) {
-                    displayMaxItemsWarning();
-                }
-            });
-        }
-    }
-
-    // Function to update the numbering after an item is removed
-    function updateItemNumbers() {
-        const headerItems = document.querySelectorAll('.header-item');
-        itemCount = headerItems.length;  // Adjust the itemCount to match current items
-
-        // Renumber the items
-        headerItems.forEach((item, index) => {
-            item.id = `header-item-${index}`;
-            item.querySelector('h5').innerText = `<?= phpb_trans('website-manager.header-item'); ?> ${index + 1}`;
-            item.querySelector('.form-control.truncate').id = `header_button_text_${index}`;
-            item.querySelector('input[type="url"]').id = `header_button_link_${index}`;
+        document.getElementById('addHeaderItemContainer').innerHTML = addButton;
+        document.getElementById('addHeaderItemButton').addEventListener('click', function () {
+            if (itemCount < maxItems) {
+                addItem();
+            }
+            if (itemCount >= maxItems) {
+                displayMaxItemsWarning();
+            }
         });
     }
+}
 </script>
