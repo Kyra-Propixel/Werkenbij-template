@@ -279,8 +279,10 @@ document.addEventListener('DOMContentLoaded', function () {
         filter: 'input, textarea',  // Prevent dragging while interacting with inputs
         preventOnFilter: false,
         onEnd: function () {
-            showOriginalPositions();  // Show original badges after moving an item
-            updateItemNumbers();  // Renumber the items after sorting
+            // Show original badges after moving an item
+            showOriginalPositions();  
+            // Renumber the items after sorting
+            updateItemNumbers();
         }
     });
 
@@ -291,20 +293,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const headerItem = input.closest('.header-item');
             const itemIndex = Array.from(headerItemsContainer.children).indexOf(headerItem);
             const heading = headerItem.querySelector('h5');
-            const originalIndex = headerItem.getAttribute('data-original-index');
-            const badge = headerItem.querySelector('.original-index');
 
             // Update heading text based on input value
             if (input.value.trim() !== '') {
                 heading.textContent = input.value.trim();  // Set the heading to input value
             } else {
                 heading.textContent = `Item ${itemIndex + 1}`;  // Default to "Item <number>"
-            }
-
-            // Ensure the badge is updated with the original index
-            if (badge) {
-                badge.textContent = `Original Position: ${originalIndex}`;
-                badge.style.display = 'inline-block'; // Show the badge
             }
         }
     });
@@ -316,18 +310,17 @@ function showOriginalPositions() {
         const originalIndex = item.getAttribute('data-original-index');
         let originalIndexBadge = item.querySelector('.original-index');
 
-        // Check if the badge doesn't already exist
+        // Create the badge only if it doesn't exist
         if (!originalIndexBadge) {
-            // Create the badge if it doesn't exist
-            originalIndexBadge = document.createElement('span');
+            originalIndexBadge = document.createElement('div');  // Create a new div for the badge
             originalIndexBadge.classList.add('badge', 'badge-primary', 'original-index');
-            originalIndexBadge.style.marginLeft = '10px'; // Add margin for spacing
-            item.querySelector('h5').appendChild(originalIndexBadge);  // Append the badge to the header
+            originalIndexBadge.style.marginTop = '10px'; // Add margin for spacing
+            item.appendChild(originalIndexBadge);  // Append the badge at the bottom of the item (card)
         }
 
         // Update the badge content with the original index
-        originalIndexBadge.textContent = `Original Position: ${originalIndex}`;
-        originalIndexBadge.style.display = 'inline-block'; // Ensure the badge is visible
+        originalIndexBadge.textContent = `Vorige Positie: ${originalIndex}`;
+        originalIndexBadge.style.display = 'block'; // Ensure the badge is visible
     });
 }
 
@@ -398,19 +391,12 @@ function updateItemNumbers() {
     headerItems.forEach((item, index) => {
         const heading = item.querySelector('h5');
         const input = item.querySelector('input[name^="header_items"][name$="[button_text]"]');
-        const originalIndex = item.getAttribute('data-original-index');
-        const badge = item.querySelector('.original-index');
 
         // Set heading to the input value or default to "Item <number>"
         if (input.value.trim() !== '') {
             heading.textContent = input.value.trim();
         } else {
             heading.textContent = `Item ${index + 1}`;
-        }
-
-        // Update the badge with the original index
-        if (badge) {
-            badge.textContent = `Original Position: ${originalIndex}`;
         }
 
         // Update IDs and other elements to reflect the correct order
