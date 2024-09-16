@@ -174,13 +174,19 @@ class BaseRepository
      * @param string $value
      * @return array
      */
-    public function findWhere($column, $value)
+    public function findWhere(string $column, $value): array
     {
         $column = $this->removeNonAlphaNumeric($column);
-        return $this->createInstances($this->db->select(
-            "SELECT * FROM {$this->table} WHERE {$column} = ?",
-            [$value]
-        ));
+
+        if (empty($column)) {
+            throw new InvalidArgumentException("Column name cannot be empty.");
+        }
+
+        $query = "SELECT * FROM {$this->table} WHERE {$column} = ?";
+        
+        $results = $this->db->select($query, [$value]);
+
+        return $this->createInstances($results ?? []);
     }
 
     /**
@@ -200,14 +206,15 @@ class BaseRepository
      * @param array $records
      * @return object|null
      */
-    protected function createInstance(array $records)
+    protected function createInstance(?array $records = [])
     {
-        $instances = $this->createInstances($records);
+        $instances = $this->createInstances($records ?? []);
         if (empty($instances)) {
             return null;
         }
         return $instances[0];
     }
+
 
     /**
      * For each record create an instance.

@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
 <div id="phpb-loading">
     <div class="circle">
         <div class="loader">
@@ -758,7 +761,108 @@ function saveGeneratedImages(imageUrls, websiteId) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    // Create the floating panel element
+    const floatingPanel = document.createElement('div');
+    floatingPanel.id = 'floating-icon-panel';
+    floatingPanel.style.position = 'absolute';
+    floatingPanel.style.backgroundColor = '#fff';
+    floatingPanel.style.border = '1px solid #ccc';
+    floatingPanel.style.padding = '10px';
+    floatingPanel.style.display = 'none'; // Initially hidden
+    floatingPanel.style.zIndex = '9999'; // Ensure it stays on top
+    document.body.appendChild(floatingPanel); // Append to the body
 
+    // Function to create the icon list inside the panel
+    function createIconList() {
+        return `
+            <h4>Select an Icon</h4>
+            <div id="icon-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <!-- Add as many icons as you need -->
+                <i class="fas fa-map-marker-alt icon-select" style="cursor: pointer; font-size: 24px;"></i>
+                <i class="fas fa-phone icon-select" style="cursor: pointer; font-size: 24px;"></i>
+                <i class="fas fa-envelope icon-select" style="cursor: pointer; font-size: 24px;"></i>
+                <i class="fas fa-globe icon-select" style="cursor: pointer; font-size: 24px;"></i>
+                <i class="fas fa-car icon-select" style="cursor: pointer; font-size: 24px;"></i>
+            </div>
+        `;
+    }
+
+    // Populate the floating panel with icons
+    floatingPanel.innerHTML = createIconList();
+
+    // Add event listeners for selecting icons
+    function attachIconClickEvents(selectedComponent) {
+        document.querySelectorAll('.icon-select').forEach(icon => {
+            icon.addEventListener('click', function () {
+                const selectedClass = this.className;
+
+                // Ensure the selected component is valid and replace its class
+                if (selectedComponent && selectedComponent.getAttributes()['data-gjs-type'] === 'raw-content') {
+                    selectedComponent.setClass(selectedClass); // Replace the icon class
+                }
+
+                // Hide the floating panel after selection
+                hideFloatingPanel();
+            });
+        });
+    }
+
+    // Function to show the floating panel
+    function showFloatingPanel(x, y, selectedComponent) {
+        floatingPanel.style.left = `${x}px`; // Position the panel next to the selected element
+        floatingPanel.style.top = `${y}px`;
+        floatingPanel.style.display = 'block'; // Show the panel
+
+        // Attach click events to icons after showing the panel
+        attachIconClickEvents(selectedComponent);
+    }
+
+    // Function to hide the floating panel
+    function hideFloatingPanel() {
+        floatingPanel.style.display = 'none';
+    }
+
+    // Handle component selection in GrapesJS
+    editor.on('component:selected', function () {
+        const selectedComponent = editor.getSelected();
+
+        // Check if the selected component is a raw-content element (like a FontAwesome icon)
+        if (selectedComponent && selectedComponent.getAttributes()['data-gjs-type'] === 'raw-content') {
+            const iconElement = selectedComponent.view.el;
+
+            // Check if the selected component is the FontAwesome icon (i.e., it contains the 'fa' class)
+            if (iconElement && iconElement.classList.contains('fa')) {
+                const rect = iconElement.getBoundingClientRect(); // Get the position of the selected element
+                showFloatingPanel(rect.right + 10, rect.top, selectedComponent); // Show the floating panel next to the element
+            }
+        } else {
+            hideFloatingPanel(); // Hide the panel if another component is selected
+        }
+    });
+
+    // Hide the panel if the user clicks outside of it
+    document.addEventListener('click', function (event) {
+        if (!floatingPanel.contains(event.target) && !event.target.closest('.gjs-block')) {
+            hideFloatingPanel(); // Hide the panel when clicking outside
+        }
+    });
+
+    // Expose a global function to show the floating panel for testing
+    window.floatPanel = function (x, y, selectedComponent) {
+        showFloatingPanel(x, y, selectedComponent);
+    };
+
+    // Expose a global function to select a component and open the panel from the console
+    window.testOpenFloatPanel = function () {
+        const selectedComponent = editor.getSelected();
+        if (selectedComponent && selectedComponent.getAttributes()['data-gjs-type'] === 'raw-content') {
+            floatPanel(100, 200, selectedComponent); // Open the floating panel for testing
+        } else {
+            console.log("No valid 'raw-content' component selected.");
+        }
+    };
+});
 
 </script>
 

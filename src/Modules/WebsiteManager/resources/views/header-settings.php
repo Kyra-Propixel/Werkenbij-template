@@ -1,14 +1,14 @@
-<!-- Font Awesome for icons removed -->
-
+<!-- Form for Menu and Preview -->
 <div class="container mt-5">
     <?php if (phpb_flash('message')): ?>
         <div class="alert alert-<?= phpb_flash('message-type') ?>">
             <?= phpb_flash('message') ?>
         </div>
     <?php endif; ?>
-    
+
+    <!-- Form for Navbar Settings -->
     <form action="<?= phpb_url('website_manager', ['route' => 'header_settings', 'action' => 'update', 'tab' => 'menus']) ?>" method="post" enctype="multipart/form-data" id="headerSettingsForm">
-        
+
         <!-- Global Header Settings (Logo and Background) -->
         <div class="header-settings form-group mb-4 p-3 border rounded">
             <h4 class="mb-3">Navbar Color & Logo</h4>
@@ -32,7 +32,20 @@
             </div>
         </div>
 
-        <!-- Container for dynamically added items (e.g., buttons) -->
+        <h3 class="alert alert-info">Let op: de preview is een weergave en kan afwijken van de uiteindelijke versie.</h3>
+        <!-- Live Preview Section -->
+        <div id="navbarPreview" class="navbar-preview mb-4 p-3" style="background-color: <?= htmlspecialchars($headerBackground ?? '#ffffff') ?>; display: flex; justify-content: space-between; align-items: center;">
+            <img src="<?= htmlspecialchars($headerLogo) ?>" alt="Logo" id="previewLogo" style="max-height: 50px; margin-right: 20px;"/>
+            <nav>
+                <ul id="previewMenuItems" style="list-style: none; padding: 0; display: flex; gap: 20px; margin: 0;">
+                    <?php foreach ($headerItems as $index => $item): ?>
+                        <li id="previewMenuItem_<?= $index ?>" style="padding: 10px;"><?= htmlspecialchars($item['button_text']) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Menu Items -->
         <div class="header-items-container form-group mb-4 p-3 border rounded">
             <h4 class="mb-3">Menu Items</h4>
 
@@ -53,14 +66,14 @@
                             </div>
 
                             <button type="button" class="btn btn-danger btn-sm remove-header-item">
-                            <i class="fas fa-trash-alt"></i> Remove Item
+                                <i class="fas fa-trash-alt"></i> Remove Item
                             </button>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
 
-            <!-- Button to add new items, which will be replaced with a warning after 6 items -->
+            <!-- Button to Add New Items -->
             <div id="addHeaderItemContainer">
                 <button type="button" class="btn btn-secondary btn-sm mb-3" id="addHeaderItemButton">
                     Add Item +
@@ -248,6 +261,167 @@
     font-weight: 500;
 }
 
+.highlight {
+    background-color: lightgreen;
+    transition: 0.4s;
+}
+
+.navbar-preview {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-preview ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 15px;
+}
+
+.navbar-preview img {
+    max-height: 50px;
+    margin-right: 20px;
+}
+
+/* Modernized card container */
+.header-item {
+    transition: transform 0.2s ease, opacity 0.2s ease-in-out;
+    background-color: #fff; /* White background for cleaner design */
+    border-radius: 16px; /* Slightly more rounded corners */
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Softer, deeper shadow */
+    margin-bottom: 24px; /* More space between cards */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover effect for cards */
+.header-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Larger, softer shadow on hover */
+}
+
+/* Title of each item */
+.header-item h5 {
+    font-size: 1.3rem; /* Slightly larger font for the item title */
+    font-weight: bold;
+    color: #333; /* Darker color for better contrast */
+    margin-bottom: 1rem;
+}
+
+/* Input field labels */
+.header-item label {
+    font-size: 0.9rem; /* Keep labels slightly smaller but legible */
+    color: #555; /* Softer grey color */
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* Modern input fields */
+.header-item .form-control {
+    border-radius: 12px; /* Softer, more rounded inputs */
+    font-size: 0.95rem;
+    padding: 12px;
+    border: 1px solid #ddd; /* Light border color */
+    transition: border-color 0.3s ease;
+}
+
+/* Input hover/focus state */
+.header-item .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.15); /* Subtle shadow on focus */
+}
+
+/* Buttons */
+.btn-danger {
+    background-color: #ff6b6b; /* Modern red color for remove button */
+    border-color: #ff6b6b;
+    padding: 8px 16px;
+    border-radius: 12px; /* Rounded corners */
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #ff4b4b; /* Darker shade on hover */
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 12px; /* Rounded corners */
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Add subtle hover effect to buttons */
+.btn {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Truncate long text in header button inputs */
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+/* Preview styling */
+.navbar-preview {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.navbar-preview img {
+    max-height: 50px;
+    margin-right: 20px;
+}
+
+.navbar-preview ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 20px; /* More space between menu items */
+}
+
+.navbar-preview li {
+    padding: 12px;
+    background-color: #f8f9fa; /* Subtle background for menu items */
+    border-radius: 8px; /* Slightly rounded menu items */
+    transition: background-color 0.3s ease;
+}
+
+.navbar-preview li:hover {
+    background-color: #e2e6ea; /* Slight hover effect */
+}
+
+.highlight {
+    background-color: #e0e0e0;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
@@ -255,6 +429,52 @@
 let itemCount = <?= isset($headerItems) ? count($headerItems) : 0 ?>;
 const maxItems = 6;
 let originalOrder = []; // Track the original positions
+
+document.addEventListener('DOMContentLoaded', function () {
+    const headerItemsContainer = document.getElementById('headerItemsContainer');
+    const previewMenuItems = document.getElementById('previewMenuItems');
+    const previewNavbar = document.getElementById('navbarPreview');
+    const previewLogo = document.getElementById('previewLogo');
+
+    // Function to update the live preview for menu items
+    function updatePreview() {
+        const menuItems = document.querySelectorAll('.header-item input[name^="header_items"][name$="[button_text]"]');
+        previewMenuItems.innerHTML = ''; // Clear the current preview
+
+        menuItems.forEach(function (input, index) {
+            const menuItem = document.createElement('li');
+            menuItem.textContent = input.value || `Item ${index + 1}`; // Default to "Item <number>" if input is empty
+            menuItem.style.padding = '10px';
+            previewMenuItems.appendChild(menuItem);
+        });
+    }
+
+    // Update navbar background color in live preview
+    document.getElementById('header_background').addEventListener('input', function () {
+        previewNavbar.style.backgroundColor = this.value;
+    });
+
+    // Update menu items text in live preview
+    document.querySelectorAll('.header-item input[name^="header_items"][name$="[button_text]"]').forEach(function (input) {
+        input.addEventListener('input', updatePreview);
+    });
+
+    // Update the logo in the live preview when a new file is selected
+    document.getElementById('header_logo').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                previewLogo.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Initialize the preview on page load
+    updatePreview();
+});
+
 
 document.addEventListener('DOMContentLoaded', function () {
     const headerItemsContainer = document.getElementById('headerItemsContainer');
@@ -270,6 +490,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize SortableJS with enhanced options
     Sortable.create(headerItemsContainer, {
+        swap: true,
+        swapClass: 'highlight',
         animation: 300,
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
@@ -283,6 +505,8 @@ document.addEventListener('DOMContentLoaded', function () {
             showOriginalPositions();  
             // Renumber the items after sorting
             updateItemNumbers();
+
+            updatePreview();
         }
     });
 
@@ -302,7 +526,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+    updatePreview();
 });
+
+// Function to update the live preview for menu items
+function updatePreview() {
+        const menuItems = document.querySelectorAll('.header-item input[name^="header_items"][name$="[button_text]"]');
+        previewMenuItems.innerHTML = ''; // Clear the current preview
+
+        menuItems.forEach(function (input, index) {
+            const menuItem = document.createElement('li');
+            menuItem.textContent = input.value || `Item ${index + 1}`; // Default to "Item <number>" if input is empty
+            menuItem.style.padding = '10px';
+            previewMenuItems.appendChild(menuItem);
+        });
+    }
 
 // Function to show original positions in badges after sorting or interaction
 function showOriginalPositions() {
@@ -350,6 +588,7 @@ document.addEventListener('click', function (event) {
         event.target.closest('.header-item').remove();
         updateItemNumbers();  // Update the item numbers after deletion
         hideMaxItemsWarning(); // Hide the warning if we're back under the limit
+        updatePreview();
     }
 });
 
@@ -380,6 +619,7 @@ function addItem(buttonText = '', buttonLink = '') {
 
     // Renumber items after adding
     updateItemNumbers();
+    updatePreview();
 }
 
 // Function to update item numbers and set headings on page reload
@@ -409,7 +649,7 @@ function updateItemNumbers() {
 // Function to display the warning message when max items limit is reached
 function displayMaxItemsWarning() {
     const warningMessage = `
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-info" role="alert">
             Je kan tot maximaal 6 items per header.
         </div>
     `;

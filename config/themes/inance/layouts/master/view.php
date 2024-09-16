@@ -46,7 +46,7 @@
         </div>
         <div class="header_bottom">
             <div class="container-fluid">
-                <nav class="navbar navbar-expand-lg custom_nav-container">
+                <nav class="navbar navbar-expand-lg custom_nav-container" id="navbar" style="padding: 4px;">
                     <a class="navbar-brand" href="index.html">
                         <span>
                             Inance
@@ -95,20 +95,21 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             const navItemsContainer = document.querySelector('[data-target="nav-items"]');
+            const navbar = document.getElementById('navbar');
 
             // Clear any existing items if necessary
             navItemsContainer.innerHTML = ''; 
 
-            // Check if the data is an array, if not, attempt to access the items
-            if (Array.isArray(data)) {
-                data.forEach(item => {
+            // Handle navbar background color
+            data.forEach(item => {
+                if (item.setting === 'header_background') {
+                    navbar.style.backgroundColor = item.value;  // Set navbar background color
+                }
+
+                if (item.setting === 'header_item') {
                     appendNavItem(item, navItemsContainer);
-                });
-            } else {
-                Object.values(data).forEach(item => {
-                    appendNavItem(item, navItemsContainer);
-                });
-            }
+                }
+            });
         })
         .catch(error => console.error('Error loading header items:', error));
 });
@@ -118,26 +119,22 @@ function appendNavItem(item, navItemsContainer) {
         const itemData = JSON.parse(item.value);  // Parse the JSON value
 
         if (itemData.button_text && itemData.button_link) {
-            // Create a new <li> element
             const li = document.createElement('li');
             li.classList.add('nav-item');
 
-            // Create an <a> element for the link
             const link = document.createElement('a');
             link.classList.add('nav-link');
             link.href = itemData.button_link;
             link.textContent = itemData.button_text;
 
-            // Append the link to the <li>
             li.appendChild(link);
-
-            // Append the <li> to the navbar container
             navItemsContainer.appendChild(li);
         }
     } catch (error) {
         console.error('Error parsing item data:', error);
     }
 }
+
 </script>
 
 

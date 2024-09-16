@@ -96,10 +96,7 @@ return [
             'options' => [
                 'startupFocus' => true,
                 'allowedContent' => true,
-                //'forcePasteAsPlainText' => false, // when true does not copy UL, random JS errors while pasting
-                //'extraAllowedContent' => '*(*);*[*];ul ol li span', // allows classes, inline styles and certain elements
-                //'enterMode' => 'CKEDITOR.ENTER_BR', // issues on pasting in Chromes
-                'extraPlugins' => 'sourcedialog,chatGPTPlug',  // Load custom plugin
+                'extraPlugins' => 'sourcedialog,chatGPTPlug',
                 'removePlugins' => 'exportpdf,magicline',
                 'toolbar' => [
                     ['Bold', 'Italic', 'Underline', 'Strike', 'Undo', 'Redo'],
@@ -110,7 +107,37 @@ return [
                     ['Sourcedialog'],
                     ['chatGPTGenerateTextButton', 'chatGPTWordCountButton'],
                 ],
-            ]
-        ]
-    ]
+                // Disable CKEditor for <i> tags
+                'on' => [
+                    'instanceReady' => 'function(evt) {
+                        CKEDITOR.dtd.$editable.i = 0;
+                    }',
+                ],
+            ],
+        ],
+    ],
+    // Disable inline editing and CKEditor on <i> elements in GrapesJS
+    'init' => 'function(editor) {
+        editor.DomComponents.addType("icon", {
+            isComponent: function(el) {
+                if (el.tagName === "I") {
+                    return { type: "icon" };
+                }
+            },
+            model: {
+                defaults: {
+                    editable: false,  // Disable editing for <i> tags
+                    droppable: false,  // Prevent elements from being dropped into <i> tags
+                    highlightable: false,  // Disable highlighting on hover
+                    tagName: "i",
+                    traits: [],  // Disable traits for icons
+                },
+                init() {
+                    this.on("dblclick", () => {
+                        openIconModal(this);  // Custom function to open icon selection modal
+                    });
+                },
+            }
+        });
+    }',
 ];

@@ -3,18 +3,12 @@
 namespace PHPageBuilder\Core;
 
 use PDO;
+use PDOException;
 
-/**
- * Class DB
- *
- * A basic shell around PDO.
- *
- * @package PHPageBuilder\Core
- */
 class DB
 {
     /**
-     * @var PDO $pdo
+     * @var PDO
      */
     protected $pdo;
 
@@ -22,72 +16,80 @@ class DB
      * DB constructor.
      *
      * @param array $config
+     * @throws PDOException
      */
     public function __construct(array $config)
     {
-        $this->pdo = new PDO(
-            $config['driver'] . ':host=' . $config['host'] . ';dbname=' . $config['database'] . ";options='--client_encoding=" . $config['charset'] . "'",
-            $config['username'],
-            $config['password'],
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
-        $this->pdo->exec("set names " . $config['charset']);
+        try {
+            $dsn = sprintf(
+                "%s:host=%s;dbname=%s;options='--client_encoding=%s'",
+                $config['driver'],
+                $config['host'],
+                $config['database'],
+                $config['charset']
+            );
+
+            $this->pdo = new PDO($dsn, $config['username'], $config['password'], [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            ]);
+
+            $this->pdo->exec("SET NAMES " . $config['charset']);
+        } catch (PDOException $e) {
+            throw new PDOException("Database connection failed: " . $e->getMessage());
+        }
     }
 
     /**
-     * Return the id of the last inserted record.
+     * Return the ID of the last inserted record.
      *
      * @return string
      */
-    public function lastInsertId()
+    public function lastInsertId(): string
     {
         return $this->pdo->lastInsertId();
     }
 
     /**
-     * Return all records of the given table and return instances of the given class.
+     * Return all records from the specified table.
      *
-     * @param array|string $columns
-     * @param string $table
+     * @param string       $table
+     * @param string|array $columns
      * @return array
      */
-    public function all(string $table, $columns = '*')
+    public function all(string $table, $columns = '*'): array
     {
-        if (is_array($columns)) {
-            foreach ($columns as &$column) {
-                $column = preg_replace('/[^a-zA-Z_]*/', '', $column);
-            }
-            $columns = implode(',', $columns);
-            $stmt = $this->pdo->prepare("SELECT {$columns} FROM {$table}");
-        } else {
-            $stmt = $this->pdo->prepare("SELECT * FROM {$table}");
-        }
+        $columns = is_array($columns) ? $this->sanitizeColumns($columns) : '*';
+        $query = sprintf("SELECT %s FROM %s", $columns, $this->sanitizeIdentifier($table));
+        $stmt = $this->pdo->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
     /**
-     * Return the first record of the given table as an instance of the given class.
+     * Find a record by its ID.
      *
      * @param string $table
-     * @param $id
-     * @return mixed
+     * @param mixed  $id
+     * @return array|null
      */
-    public function findWithId(string $table, $id)
+    public function findWithId(string $table, $id): ?array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM {$table} WHERE id = ?");
+        $query = sprintf("SELECT * FROM %s WHERE id = ?", $this->sanitizeIdentifier($table));
+        $stmt = $this->pdo->prepare($query);
         $stmt->execute([$id]);
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        return $result ?: null;
     }
 
     /**
-     * Perform a custom select query with user input data passed as $parameters.
+     * Execute a custom select query with parameters.
      *
      * @param string $query
-     * @param array $parameters
+     * @param array  $parameters
      * @return array
      */
-    public function select(string $query, array $parameters)
+    public function select(string $query, array $parameters = []): array
     {
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($parameters);
@@ -95,15 +97,37 @@ class DB
     }
 
     /**
-     * Perform a custom query with user input data passed as $parameters.
+     * Execute a custom query with optional parameters.
      *
      * @param string $query
-     * @param array $parameters
+     * @param array  $parameters
      * @return bool
      */
-    public function query(string $query, array $parameters = [])
+    public function query(string $query, array $parameters = []): bool
     {
         $stmt = $this->pdo->prepare($query);
         return $stmt->execute($parameters);
+    }
+
+    /**
+     * Sanitize column names to prevent SQL injection.
+     *
+     * @param array $columns
+     * @return string
+     */
+    private function sanitizeColumns(array $columns): string
+    {
+        return implode(',', array_map([$this, 'sanitizeIdentifier'], $columns));
+    }
+
+    /**
+     * Sanitize identifiers like table or column names.
+     *
+     * @param string $identifier
+     * @return string
+     */
+    private function sanitizeIdentifier(string $identifier): string
+    {
+        return preg_replace('/[^a-zA-Z0-9_]/', '', $identifier);
     }
 }

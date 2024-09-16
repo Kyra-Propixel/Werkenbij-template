@@ -303,7 +303,149 @@ class PHPageBuilder
         }
 
         header("HTTP/1.1 404 Not Found");
-        die('PHPageBuilder page not found. Check your URL: <b>' . phpb_e(phpb_full_url(phpb_current_relative_url())) . '</b>');
+        die('
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina Niet Gevonden</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .error-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+        }
+
+        h1 {
+            font-size: 26px;
+            color: #ff4f4f;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.1s;
+        }
+
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.2s;
+        }
+
+        .url-box {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.3s;
+        }
+
+        .info-box {
+            background-color: #e7f3fe;
+            padding: 20px;
+            border: 1px solid #b3d4fc;
+            border-radius: 8px;
+            color: #31708f;
+            text-align: left;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.4s;
+        }
+
+        a {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #ff4f4f;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.5s;
+        }
+
+        a:hover {
+            background-color: #e84343;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: #ddd;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <img src="https://dev01.propixel.nl//Logo_Transparante-achtergrond.svg" height="50px" alt="Bedrijfslogo" class="mb-4 fade-in">
+        <h1>Whoops! 404 - Pagina Niet Gevonden</h1>
+        <p>We hebben de pagina die je zoekt niet kunnen vinden.</p>
+        <div class="url-box"> ' . phpb_e(phpb_full_url(phpb_current_relative_url())) . '</div>
+        <a href="/">Ga naar de Homepage</a>
+
+        <hr>
+
+        <div class="info-box">
+            <h2>Was dit een pagina die je hebt aangemaakt?</h2>
+            <p>Om een route toe te voegen, volg de onderstaande stappen:</p>
+            <ol>
+                <li>Log in op het dashboard.</li>
+                <li>Navigeer naar <strong>Pagina</strong> in het menu.</li>
+                <li>Klik op <strong>Nieuwe pagina toevoegen</strong>.</li>
+                <li>Voer de URL in, bijvoorbeeld <strong><?= phpb_e(phpb_current_relative_url()) ?></strong> als de URL die je wilt aanmaken is <strong><?= phpb_e(phpb_current_relative_url()) ?></strong>.</li>
+                <li>Vul de rest van de paginagegevens in en sla de pagina op.</li>
+            </ol>
+            <p>Als de URL die je probeert te bezoeken <strong><?= phpb_e(phpb_current_relative_url()) ?></strong> is, volg dan de bovenstaande stappen om deze toe te voegen aan je site.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+');
     }
 
     /**

@@ -25,12 +25,19 @@
             padding: 40px;
             max-width: 400px;
             text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
         }
 
         #welcome-page img {
             max-width: 100%;
             height: auto;
             margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.1s;
         }
 
         #welcome-page p {
@@ -38,6 +45,10 @@
             font-size: 18px;
             color: #333333;
             margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.2s;
         }
 
         .intro-links a {
@@ -48,10 +59,25 @@
             text-decoration: none;
             border-radius: 5px;
             transition: background-color 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-in-out forwards;
+            animation-delay: 0.3s;
         }
 
         .intro-links a:hover {
             background-color: #0056b3;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>

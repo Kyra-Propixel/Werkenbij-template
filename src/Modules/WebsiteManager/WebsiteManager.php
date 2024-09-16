@@ -231,16 +231,17 @@ class WebsiteManager implements WebsiteManagerContract
     public function renderMenuItemsAPI(){
         $headerSettingRepository = new HeaderSettingRepository();
         $headerSettings = $headerSettingRepository->getAll();
-
-        // Filter out only header_item settings
+    
         $headerItems = array_filter($headerSettings, function ($setting) {
-            return $setting['setting'] === 'header_item';
+            return $setting['setting'] === 'header_item' || $setting['setting'] === 'header_background';
         });
-
+    
         header('Content-Type: application/json');
         echo json_encode($headerItems);
         exit();
     }
+    
+
     /**
      * Render the website manager welcome page for installations without a homepage.
      */
