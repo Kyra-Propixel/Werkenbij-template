@@ -1,0 +1,114 @@
+:root {
+  --primarytextcolour: #01161e;
+  --secondarytextcolour:  #ffffff;
+  --primarycolour:  #124559;
+  --secondarycolour:  #537b89;
+  --tertiarycolour: #eff6e0;
+  --quaternarycolour:#D6E0E2;
+  --accent1-colour: #aec3b0;
+  --accent2-colour: #509f57;
+
+      /*  em fontsize */
+      --font-size-l: 1.25em;  /* 20px */
+      --font-size-m: 1em;     /* 16px */
+      --font-size-s: 0.75em;  /* 12px */
+      --font-size-xl: 1.5em;  /* 24px */
+      --font-size-xxl: 2.25em;/* 36px */
+      --font-size-xxxl: 3.25em; /*52px*/
+    
+      --font-size-tablet-xs: 0.75em; /* 12px */
+      --font-size-tablet-s: 0.875em; /* 14px */
+      --font-size-tablet-m: 1.125em; /* 18px */
+      --font-size-tablet-l: 1.5em;   /* 24px */
+      --font-size-tablet-xl: 2em;    /* 32px */
+  
+  
+      --font-family-lato: "Lato", "Open Sans";
+      --font-family-sometype_mono: "Sometype Mono", Helvetica;
+  
+
+  h1 {
+    font-family: var(--font-family-lato);
+    font-size: var(--font-size-xxxl);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height:1.2em;
+    text-align:center;
+  }
+
+  h2 {
+    font-family: var(--font-family-sometype_mono);
+    font-size: var(--font-size-xl);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height:1.2em;
+    text-align:center;
+  }
+
+  h3 {
+    font-family: var(--font-family-lato);
+    font-size: var(--font-size-xxl);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height:1.4em;
+    text-align:center;
+  }
+
+  h4 {
+    font-family: var(--font-family-lato);
+    font-size: var(--font-size-l);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height:1.2em;
+    text-align:center;
+  }
+
+  p, label, li {
+    font-family: var(--font-family-lato);
+    font-size: var(--font-size-m);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height:1.4em;
+    text-align:left;
+  }
+
+   .bold {
+    font-weight: 600!important;
+  }
+
+  a {
+    font-family: var(--font-family-lato);
+  }
+
+  .btn-s {
+    font-family: var(--font-family-lato);
+    font-size: var(--font-size-m);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height:1.2em;
+    text-align:center;
+  }
+
+  .btn-m {
+    font-family: var(--font-family-lato);
+    font-size: 1.2em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    line-height:1.2em;
+    text-align:center;
+  }
+
+  .text-small {
+    font-size: 0.85em;
+  }
+
+
+}
+

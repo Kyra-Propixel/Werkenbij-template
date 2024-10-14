@@ -1,0 +1,66 @@
+<section title="open-sollicitatie" id="open-sollicitatie">
+    <div class="open-sollicitatie" id="open-sollicitatie">
+      <h3>Geen match met de huidige vacatures, maar wel met onze visie?<br> 
+        Stuur een open sollicitatie en maak deel uit van PureTech!</h3>
+      <p>
+        Zie je geen vacature die helemaal bij jou past, maar spreekt PureTech je aan? We staan altijd open voor getalenteerde professionals die ons team willen versterken. Stuur gerust een open sollicitatie met je cv en motivatiebrief, zodat we kunnen kijken of er een passende rol voor jou beschikbaar is. Bij PureTech geloven we in innovatie en talent, en misschien ben jij wel onze volgende aanwinst!
+      </p>
+      <button id="open-form-btn" aria-expanded="false" class="open-sollicitatie-btn button btn-s">Stuur een open sollicitatie</button>
+      <div class="open-sol-form" id="open-sol-form" aria-hidden="true">
+        <div class="form-container">
+          <p class="disclaimer">* Verplicht veld.</p><br>
+          <form>
+            <div class="row">
+              <div class="col-6">
+                <label for="voornaam">Voornaam *</label>
+                <input type="text" id="voornaam" name="voornaam" required>
+              </div>
+              <div class="col-6">
+                <label for="achternaam">Achternaam *</label>
+                <input type="text" id="achternaam" name="achternaam" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label for="mobiel">Telefoonnummer</label>
+                <input type="number" id="mobiel" name="mobiel" placeholder="06-12345678">
+              </div>
+              <div class="col-6">
+                <label for="email">E-mailadres*</label>
+                <input type="email" id="email" name="email" placeholder="naam@domein.nl" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="textarea">Korte motivatie</label>
+                <textarea></textarea>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label for="file">Upload hier je CV*</label>
+                <div class="upload-container">
+                  <input type="file" id="file" name="file" accept=".pdf, .docx, .png, .jpg" style="display:none">
+                  <div class="upload-bar">
+                    <span class="file-name">Bestand kiezen</span>
+                    <label for="file" class="upload-btn"><i class="fa-solid fa-file-arrow-up"></i> Bladeren</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="file2">Upload hier eventueel je motivatiebrief</label>
+                <div class="upload-container">
+                  <input type="file" id="file2" name="file2" accept=".pdf, .docx, .png, .jpg" style="display:none">
+                  <div class="upload-bar">
+                    <span class="file-name">Bestand kiezen</span>
+                    <label for="file2" class="upload-btn"><i class="fa-solid fa-file-arrow-up"></i> Bladeren</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn-s form-btn">Volgende <i class="fa fa-arrow-right"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+</section>     
